@@ -2,6 +2,9 @@ import datetime
 import requests
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_core.tools import tool
+import urllib.parse
+import os
+import subprocess
 
 
 @tool('clock', description='Tool para obter dia e hora atual. Usa isto quando te perguntarem o dia ou a hora atual')
@@ -25,8 +28,47 @@ web_search = DuckDuckGoSearchRun(
 
 @tool('weather', description='Tool para pesquisar o estado do tempo numa cidade especifica')
 def get_weather(localizacao : str):
+    """Permite procurar o clima em determinadas localizações"""
     try:
         resposta = requests.get(f"https://wttr.in/{localizacao}?format=3")
         return resposta.text
     except Exception as e:
         return f'Não foi possível obter o tempo: {e}'
+    
+
+@tool('open_programs', description = 'Tool para abrir programas no computador. Apenas podes abrir os programas permitidos!!')
+def abrir_programa(nome_app: str):
+    """Executa apenas aplicações permitidas usando subprocessos seguros"""
+    
+    apps_permitidas = {
+            "bloco de notas": "notepad.exe",
+            "notepad": "notepad.exe",
+            "notas": "notepad.exe",
+            "calculadora": "calc.exe",
+            "calc": "calc.exe",
+            "chrome": "chrome.exe",
+            "browser": "chrome.exe",
+            "internet": "chrome.exe"
+    }
+    
+    app_limpa = nome_app.lower()
+    if app_limpa in apps_permitidas:
+        try:
+            subprocess.run([apps_permitidas[app_limpa]], check=True, shell=False)
+            return f"A abrir {nome_app}."
+        except Exception as e:
+            return f"Erro ao executar: {e}"
+    else:
+        return f"Acesso negado."
+
+
+@tool('play_music_spotify', description='Usa esta tool para abrir o Spotify e procurar por uma música, artista ou podcast específico.')
+def tocar_musica(pesquisa: str):
+    """Abre o Spotify com a pesquisa formatada."""
+    try:
+        query_formatada = urllib.parse.quote(pesquisa)
+        os.system(f"start spotify:search:{query_formatada}")
+        
+        return f"O Spotify foi aberto com a pesquisa: {pesquisa}."
+    except Exception as e:
+        return f"Erro aos sistemas de áudio: {e}"
