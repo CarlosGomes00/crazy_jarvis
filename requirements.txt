@@ -1,0 +1,11 @@
+langchain
+langchain-community
+langchain-ollama
+langgraph
+duckduckgo-search langchain-community
+ddgs
+requests
+SpeechRecognition
+pyttsx3
+pyaudio
+
