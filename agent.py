@@ -71,11 +71,11 @@ class Agent:
         
         
 if __name__ == '__main__':
-    tools_construidas = [get_current_time, calculator, web_search, get_weather, tocar_musica, abrir_programa] 
+    tools_construidas = [calculator, web_search, get_weather, play_spotify_music, open_program] 
     jarvis = Agent(model_name='gemma4:e2b',
                    tools=tools_construidas,
                    system=system_prompt,
-                   use_qc=True)
+                   use_qc=False)
     
     print('🤖 Jarvis Online! O que precisas?')
     print("-" * 100)
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     config_estado = {"configurable": {"thread_id": "conversa_1"}}
 
     while True:
-        pergunta = input()
+        pergunta = input('Escreva aqui:')
         if pergunta.strip().lower() == 'sair':
             print("A desligar... Até à proxima! :) ")
             break
