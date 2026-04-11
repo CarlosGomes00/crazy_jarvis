@@ -39,11 +39,11 @@ web_search = TavilySearch(
 )
 
 
-@tool('weather', description='Tool para pesquisar o estado do tempo numa cidade especifica')
+@tool('weather', description='Tool para pesquisar o estado do tempo, temperatura ou previsão de chuva numa cidade especifica')
 def get_weather(localizacao : str):
-    """Permite procurar o clima em determinadas localizações"""
+    """Permite procurar o clima e a existência de chuva em determinadas localizações"""
     try:
-        resposta = requests.get(f"https://wttr.in/{localizacao}?format=3")
+        resposta = requests.get(f"https://wttr.in/{localizacao}?format=%C,+Temp:+%t,+Chuva:+%p")
         return resposta.text
     except Exception as e:
         return f'Não foi possível obter o tempo: {e}'
