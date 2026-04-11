@@ -89,12 +89,19 @@ if __name__ == '__main__':
             break
             
         novo_estado = {"messages": [HumanMessage(content=pergunta)]}
+
+        resposta_final = ''
         
-        for event in jarvis.app.stream(novo_estado, config=config_estado):
-            for key, value in event.items():
-                if key == "tools":
-                    print("Hmmm, deixa-me ver...")
-                elif key == "jarvis":
-                    resposta_final = value["messages"][-1].content
+        try:
+            for event in jarvis.app.stream(novo_estado, config=config_estado):
+                for key, value in event.items():
+                    if key == "tools":
+                        print("A pesquisar a informação...")
+                    elif key == "jarvis":
+                        resposta_final = value["messages"][-1].content
+        except Exception as e:
+            print('🤖 Jarvis: Desculpa.. deu-me um bug no sistema, podes repetir a pergunta pf?')
+            print(f'Erro: {e}')
+            
         if resposta_final: 
             print(f"🤖 Jarvis: {resposta_final}")
