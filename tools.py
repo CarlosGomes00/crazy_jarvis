@@ -6,6 +6,7 @@ from langchain_core.tools import tool
 import urllib.parse
 import os
 import subprocess
+import json
 from dotenv import load_dotenv, find_dotenv
 
 
@@ -86,3 +87,32 @@ def play_spotify_music(pesquisa: str):
         return f"O Spotify foi aberto com a pesquisa: {pesquisa}."
     except Exception as e:
         return f"Erro aos sistemas de áudio: {e}"
+    
+
+
+@tool('remember_user_facts', description='Usa esta tool quando for necessário guardar informação, gostos pessoais ou tarefas do utilizador')
+def remember_user_facts(new_facts : dict):
+    """Guarda ou atualiza informações no perfil do utilizador (perfil.json)."""
+
+    file = 'perfil.json'
+    dados_perfil = {}
+
+    if os.path.exists(file):
+        try:
+            with open(file, 'r', encoding='utf-8') as f:
+                dados_perfil = json.load(f)
+        except json.JSONDecodeError:
+            print("Aviso: O perfil.json estava corrompido e foi limpo")
+            dados_perfil = {}
+
+    dados_perfil.update(new_facts)
+
+    try:
+        with open(file, 'w', encoding='utf-8') as f:
+            json.dump(dados_perfil, f, indent=4, ensure_ascii=False)
+        return f"Sucesso: Guardei as {len(new_facts)} informação na minha memória permanente."
+
+    except Exception as e:
+        return f"Erro ao tentar guardar na memória: {e}"
+
+
