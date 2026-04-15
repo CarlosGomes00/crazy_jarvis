@@ -71,7 +71,7 @@ class Agent:
         
         
 if __name__ == '__main__':
-    tools_construidas = [calculator, web_search, get_weather, play_spotify_music, open_program, remember_user_facts] 
+    tools_construidas = [calculator, web_search, get_weather, play_spotify_music, open_program, remember_user_facts, execute_code_cloud] 
     jarvis = Agent(model_name='gemma4:e2b',
                    tools=tools_construidas,
                    system=system_prompt,

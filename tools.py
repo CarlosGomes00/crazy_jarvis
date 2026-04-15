@@ -8,6 +8,7 @@ import os
 import subprocess
 import json
 from dotenv import load_dotenv, find_dotenv
+from e2b import Sandbox
 
 
 #@tool('clock', description='Tool para obter dia e hora atual. Usa isto quando te perguntarem o dia ou a hora atual')
@@ -17,7 +18,8 @@ from dotenv import load_dotenv, find_dotenv
 
 
 load_dotenv(find_dotenv())
-chave_tavily = os.getenv("TAVILY_API_KEY")
+chave_tavily = os.getenv('TAVILY_API_KEY')
+chave_e2b = os.getenv('E2B_API_KEY')
 
 
 @tool('calculator', description='Tool para fazer calculos. Usa isto para qualquer problema matemático')
@@ -116,3 +118,34 @@ def remember_user_facts(new_facts : dict):
         return f"Erro ao tentar guardar na memória: {e}"
 
 
+
+@tool('execute_code_cloud', description='Esta tool serve para executar código na Cloud utilizando o E2B. ATENÇÃO: Usa APENAS se o utilizador pedir explicitamente para correr na "nuvem", "cloud" ou "E2B".')
+def execute_code_cloud(code: str):
+    """Executa código numa Sandbox remota e segura"""
+    
+    sbx = None
+    
+    try:
+        print('A instanciar a sandbox na cloud')
+        sbx = Sandbox.create(timeout=60)
+
+        caminho_ficheiro = "/tmp/script_jarvis.py"
+        sbx.files.write(caminho_ficheiro, code)
+
+        resultado = sbx.commands.run(f"python {caminho_ficheiro}")
+
+        output = resultado.error
+        erro = resultado.stderr
+
+        if erro:
+            return f'Código com erros:\nErro: {erro}\nOutput: {output}'
+
+        return f"Resultado da Cloud:\n{output if output else 'Código executado (sem output no terminal).'}"
+
+    except Exception as e:
+        print(f'Erro na tool: {e}')
+        return f"Erro na ligação: {e}"
+
+    finally:
+        if sbx:
+            sbx.kill()
