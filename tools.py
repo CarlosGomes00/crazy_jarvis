@@ -9,6 +9,7 @@ import subprocess
 import json
 from dotenv import load_dotenv, find_dotenv
 from e2b import Sandbox
+import docker
 
 
 #@tool('clock', description='Tool para obter dia e hora atual. Usa isto quando te perguntarem o dia ou a hora atual')
@@ -119,7 +120,38 @@ def remember_user_facts(new_facts : dict):
 
 
 
-@tool('execute_code_cloud', description='Esta tool serve para executar código na Cloud utilizando o E2B. ATENÇÃO: Usa APENAS se o utilizador pedir explicitamente para correr na "nuvem", "cloud" ou "E2B".')
+@tool('execute_code_local', description='Esta toll serve para executar código LOCALMENTE. Deve ser utilizada como ferramenta principal e por defeito para escrever/testar código, com excepções dos casos em que o user menciona a cloud!')
+def execute_code_local(code: str):
+
+    try:
+        client = docker.from_env()
+
+        comando = ["timeout", "10", "python", "-c", code]
+
+        print('Jarvis a instanciar o docker...')
+
+        resultado = client.containers.run(
+            image='python:3.10-alpine',
+            command=comando,
+            remove=True,
+            network_disabled=True,
+            mem_limit='200m'
+        )
+    
+        return f"Output do Docker Local:\n{resultado.decode('utf-8')}"
+
+    except docker.errors.ContainerError as e:
+        erro_txt = e.stderr.decode('utf-8') if e.stderr else 'Timeout de excedido'
+        print(f"Erro no código do docker: {erro_txt}")
+        return f"O código falhou. Erro:\n{erro_txt}"
+    
+    except Exception as e:
+        print(f'Erro a instanciar o docker: {e}')
+        return f'Erro no Docker Local: {e}'
+
+
+
+@tool('execute_code_cloud', description='Esta tool serve para executar código na CLOUD utilizando o E2B. ATENÇÃO: Usa APENAS se o utilizador pedir explicitamente para correr na "nuvem", "cloud" ou "E2B".')
 def execute_code_cloud(code: str):
     """Executa código numa Sandbox remota e segura"""
     
