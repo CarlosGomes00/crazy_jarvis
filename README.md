@@ -32,6 +32,11 @@ You can enable or disable it using the **use_qc** parameter in the Agent class.
 ![Esquema](images/agent_pipeline.png)
 
 
+## In progress
+
+Connecting via the AlphaVantage API to financial data, which will be extracted and stored in PostgreSQL and ChromaDB so that it can be accessed by the agent.
+
+
 ##  References
 
 The following tools were used to execute the project:
