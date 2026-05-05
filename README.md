@@ -19,6 +19,9 @@ This project demonstrates the orchestration of **Large Language Models** running
 * **Tools:** Access to several tools such as Web Search (via the Tavily API), amongst other things.
 
 
+If you use tools such as Tavily or E2B, don’t forget to create a .env file containing your API keys. You can also switch Tavily’s search engine to DuckDuckGo, but the results will be poorer.
+
+
 ## Agentic Pipeline
 
 The pipeline has been designed to allow a second agent to act as a reviewer of the output, provided that your hardware supports this. Otherwise, the increased latency may not justify its use, depending on the task. 
