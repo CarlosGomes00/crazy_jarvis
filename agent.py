@@ -6,7 +6,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from langchain_ollama import ChatOllama
 from langgraph.checkpoint.memory import MemorySaver
 from tools import *
-from utis import system_prompt, qc_prompt
+from utils import system_prompt, qc_prompt
 
 
 
