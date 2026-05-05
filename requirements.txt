@@ -9,3 +9,4 @@ SpeechRecognition
 pyttsx3
 pyaudio
 e2b
+chromadb
