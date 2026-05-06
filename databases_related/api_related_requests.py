@@ -64,10 +64,10 @@ def extract_daily_prices(ticker : str):
     }
 
 
-if __name__ == '__main__':
-    dados_finais = extract_daily_prices('SPY')
 
-    if dados_finais:
-        dia_recente = list(dados_finais['dados'].keys())[0]
-        preco_fecho = dados_finais["dados"][dia_recente]["4. close"]
-        print(f"Resumo Final: {dados_finais['nome']} fechou a ${preco_fecho} no dia {dia_recente}")
+
+
+
+
+    
+
