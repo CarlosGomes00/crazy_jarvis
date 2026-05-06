@@ -10,3 +10,4 @@ pyttsx3
 pyaudio
 e2b
 chromadb
+psycopg2-binary
