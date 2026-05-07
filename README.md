@@ -28,6 +28,8 @@ The pipeline has been designed to allow a second agent to act as a reviewer of t
 
 You can enable or disable it using the **use_qc** parameter in the Agent class.
 
+In addition, the agent is able to retrieve information from a PostgreSQL database containing financial data, which has been obtained in advance via the Alpha Vangate API.
+
 
 ![Esquema](images/agent_pipeline.png)
 
