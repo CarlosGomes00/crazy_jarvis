@@ -10,6 +10,7 @@ import json
 from dotenv import load_dotenv, find_dotenv
 from e2b import Sandbox
 import docker
+import psycopg2
 
 
 #@tool('clock', description='Tool para obter dia e hora atual. Usa isto quando te perguntarem o dia ou a hora atual')
@@ -21,6 +22,8 @@ import docker
 load_dotenv(find_dotenv())
 chave_tavily = os.getenv('TAVILY_API_KEY')
 chave_e2b = os.getenv('E2B_API_KEY')
+chave_db_user = os.getenv('DB_USER')
+chave_db_pass = os.getenv('DB_PASSWORD')
 
 
 @tool('calculator', description='Tool para fazer calculos. Usa isto para qualquer problema matemático')
@@ -181,3 +184,94 @@ def execute_code_cloud(code: str):
     finally:
         if sbx:
             sbx.kill()
+
+
+@tool('get_daily_prices', description='Esta tool serve para ir buscar informações sobre preços diários de uma ação/ETF à base de dados. Usa esta tool quando o utilizador perguntar por variações DIÁRIAS')
+def get_daily_prices(ticker: str, dias: int):
+    
+    try:
+
+        conn = psycopg2.connect(
+            host="localhost",
+            database="market_data",
+            user=chave_db_user,
+            password=chave_db_pass,
+            port="5432"
+        )
+
+        cur = conn.cursor()
+
+        query = """
+            SELECT price_date, close_price, volume
+            FROM daily_prices
+            WHERE ticker = %s
+            ORDER BY price_date DESC
+            LIMIT %s;
+        """
+
+        cur.execute(query, (ticker, dias))
+        linhas = cur.fetchall()
+
+        if not linhas:
+            return f"Não foram encontrados encontrei dados para o ticker '{ticker}' na base de dados. Informa o utilizador que é necessário extrair os dados primeiro."
+        
+        relatorio = f'Dados históricos recentes para {ticker}:\n'
+
+        for linha in linhas:
+            data_preco, preco, volume = linha
+            relatorio += f"- Data: {data_preco} | Preço de Fecho: ${preco} | Volume: {volume}\n"
+
+        return relatorio
+    
+    except Exception as e:
+        return f"Erro ao tentar ler a base de dados: {e}"
+    
+    finally:
+        if 'conn' in locals() and conn:
+            cur.close()
+            conn.close()
+
+
+@tool('get_weekly_prices', description='Esta tool serve para ir buscar informações sobre preços semanais de uma ação/ETF à base de dados. Usa esta tool quando o utilizador perguntar por variações SEMANAIS')
+def get_weekly_prices(ticker: str, semanas: int):
+    
+    try:
+
+        conn = psycopg2.connect(
+            host="localhost",
+            database="market_data",
+            user=chave_db_user,
+            password=chave_db_pass,
+            port="5432"
+        )
+
+        cur = conn.cursor()
+
+        query = """
+                    SELECT week_start, max_close_price, min_close_price, avg_close_price, total_weekly_volume
+                    FROM weekly_prices
+                    WHERE ticker = %s
+                    LIMIT %s;
+                """
+
+        cur.execute(query, (ticker, semanas))
+        linhas = cur.fetchall()
+
+        if not linhas:
+            return f"Não foram encontrados encontrei dados para o ticker '{ticker}' na base de dados. Informa o utilizador que é necessário extrair os dados primeiro."
+        
+        relatorio = f'Dados históricos recentes para {ticker}:\n'
+
+        for linha in linhas:
+            data_preco, preco_maximo, preco_minimo, preco_medio, volume = linha
+            relatorio += f"- Semana: {data_preco} | Preço Maximo: {preco_maximo} | Preço Minimo: {preco_minimo}$ | Preço Médio: {preco_medio}$ | Volume: {volume}\n"
+
+        return relatorio
+    
+    except Exception as e:
+        return f"Erro ao tentar ler a base de dados: {e}"
+    
+    finally:
+        if 'conn' in locals() and conn:
+            cur.close()
+            conn.close()
