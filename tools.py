@@ -11,7 +11,7 @@ from dotenv import load_dotenv, find_dotenv
 from e2b import Sandbox
 import docker
 import psycopg2
-
+import chromadb
 
 #@tool('clock', description='Tool para obter dia e hora atual. Usa isto quando te perguntarem o dia ou a hora atual')
 #def get_current_time(*args, **kwargs):
@@ -275,3 +275,42 @@ def get_weekly_prices(ticker: str, semanas: int):
         if 'conn' in locals() and conn:
             cur.close()
             conn.close()
+
+
+@tool('get_market_news', description='Pesquisa na base de dados vetorial (ChromaDB) por notícias recentes e sentimentos do mercado sobre um ticker. Usa esta tool quando o utilizador pedir o sentimento atual, notícias, novidades ou o porquê de uma ação estar a subir/descer.')
+def get_market_news(ticker: str, tema_pesquisa: str = "general market outlook and sentiment") -> str:
+    """
+    Vai ao ChromaDB ler as notícias mais relevantes para o ticker dado usando pesquisa semântica.
+    O 'tema_pesquisa' serve para guiar o ChromaDB a encontrar a notícia certa (ex: "lançamento de novo produto", "resultados financeiros").
+    tema_pesquisa: Uma frase para ajudar na pesquisa semântica que TU geras para encontrar a melhor notícia (ex: se o utilizador perguntar o motivo de uma queda, tu escreves "reasons for stock drop, bad earnings, lawsuit")
+    """
+    
+    try:
+        chroma_client = chromadb.HttpClient(host='localhost', port=8000)
+        colecao = chroma_client.get_collection(name="market_news")
+        
+        # A Magia da Pesquisa Semântica!
+        # Passamos a pergunta e ele gera o vetor na hora para comparar com os que já lá estão.
+        resultados = colecao.query(
+            query_texts=[tema_pesquisa],
+            n_results=3, # Traz as 3 notícias mais relevantes
+            where={"ticker": ticker} # Filtro de Metadados: Garante que não mistura notícias da Apple com o SPY
+        )
+        
+        if not resultados['documents'][0]:
+            return f"Não encontrei notícias recentes para {ticker} na base de dados."
+            
+        relatorio = f"Últimas Notícias Encontradas para {ticker}:\n\n"
+        
+        for doc, meta in zip(resultados['documents'][0], resultados['metadatas'][0]):
+            sentimento = meta.get('sentimento', 'Desconhecido')
+            data_pub = meta.get('data_publicacao', 'Desconhecida')
+            
+            relatorio += f"[{data_pub}] Sentimento: {sentimento}\n"
+            relatorio += f"{doc}\n"
+            relatorio += "-" * 30 + "\n"
+            
+        return relatorio
+        
+    except Exception as e:
+        return f"Erro ao tentar aceder à base de dados de notícias: {str(e)}"
