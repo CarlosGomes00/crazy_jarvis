@@ -65,6 +65,33 @@ def extract_daily_prices(ticker : str):
 
 
 
+def extract_market_info(ticker : str, limit : int = 3):
+
+    print(f'A procurar top {limit} de noticias para o ticker: {ticker}')
+
+    company_info = check_ticker(ticker)
+
+    if not company_info:
+        return None
+    
+    time.sleep(2)
+    
+    url_news = f'https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers={ticker}&limit={limit}&apikey={chave_alpha_vantage}'
+
+    news = requests.get(url_news).json()
+    
+    if 'feed' not in news:
+        print('Erro, request sem a info esperada')
+        return None
+
+    news_filtradas = news['feed'][:limit] 
+
+    return news_filtradas
+
+    
+
+
+
 
 
 
