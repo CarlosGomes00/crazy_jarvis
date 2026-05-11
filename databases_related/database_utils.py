@@ -2,6 +2,7 @@ import psycopg2
 from psycopg2.extras import execute_values
 from dotenv import load_dotenv
 import os
+import chromadb
 
 load_dotenv()
 
@@ -61,3 +62,40 @@ def save_to_database_daily(ticker_data):
         if conn:
             cur.close()
             conn.close()
+
+
+def save_to_database_news(ticker: str, news : list):
+
+    assert news
+
+    try:
+        chroma_client = chromadb.HttpClient(host='localhost', port=8000)
+        colecao = chroma_client.get_or_create_collection(name="market_news")
+
+        documentos = []
+        metadados = []
+        ids = []
+
+        for index, artigo in enumerate(news):
+            titulo = artigo.get('title', '')
+            resumo = artigo.get('summary', '')
+            texto_para_vetor = f"Título: {titulo}\nResumo: {resumo}"
+            
+            meta = {
+                "ticker": ticker,
+                "data_publicacao": artigo.get('time_published', ''),
+                "sentimento": artigo.get('overall_sentiment_label', ''),
+                "fonte": artigo.get('source', ''),
+                "url": artigo.get('url', '')
+            }
+            doc_id = f"Idx{index}_{ticker}_{artigo.get('time_published', f'idx_{index}')}"
+            
+            documentos.append(texto_para_vetor)
+            metadados.append(meta)
+            ids.append(doc_id)
+            
+        colecao.upsert(documents=documentos, metadatas=metadados, ids=ids)
+        print(f"✅ [ChromaDB] {len(documentos)} vetores injetados para {ticker}.")
+
+    except Exception as e:
+        print(f'Erro: {e}')
