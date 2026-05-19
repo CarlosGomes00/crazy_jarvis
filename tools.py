@@ -289,12 +289,10 @@ def get_market_news(ticker: str, tema_pesquisa: str = "general market outlook an
         chroma_client = chromadb.HttpClient(host='localhost', port=8000)
         colecao = chroma_client.get_collection(name="market_news")
         
-        # A Magia da Pesquisa Semântica!
-        # Passamos a pergunta e ele gera o vetor na hora para comparar com os que já lá estão.
         resultados = colecao.query(
             query_texts=[tema_pesquisa],
-            n_results=3, # Traz as 3 notícias mais relevantes
-            where={"ticker": ticker} # Filtro de Metadados: Garante que não mistura notícias da Apple com o SPY
+            n_results=3,
+            where={"ticker": ticker} 
         )
         
         if not resultados['documents'][0]:
