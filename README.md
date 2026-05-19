@@ -29,10 +29,13 @@ The pipeline has been designed to allow a second agent to act as a reviewer of t
 You can enable or disable it using the **use_qc** parameter in the Agent class.
 
 In addition, the agent is able to retrieve information from both a PostgreSQL database containing structured financial data and a ChromaDB vector database containing market news. Both sources are populated in advance via the Alpha Vantage API.
-
+do
 
 ![Esquema](images/agent_pipeline.png)
 
+
+
+PS: The system prompt in the **utils_template.py** file is just a template. To get the most out of the pipeline, I recommend using a custom prompt.
 
 
 ##  References
